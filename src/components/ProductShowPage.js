@@ -4,7 +4,8 @@ import "./css/ProductShowPage.css";
 import { ProductDetails } from "./ProductDetails";
 import { ReviewList } from "./ReviewList";
 import { TagList } from "./TagList";
-import oneProductData from '../oneProductData'
+import { Product } from "../api/product";
+import { Spinner } from "./Spinner";
 
 class ProductShowPage extends Component {
   constructor(props) {
@@ -13,13 +14,16 @@ class ProductShowPage extends Component {
     // constructor with 'super' passing it the 'props'
     super(props);
     this.state = {
-      product: oneProductData
+      product: {
+        tags: []
+      },
+      isLoading: true
     };
   }
 
   deleteProduct() {
     this.setState({
-      product: null
+      product: null 
     });
   }
 
@@ -32,13 +36,28 @@ class ProductShowPage extends Component {
     });
   }
 
+  componentDidMount() {
+    // All components that are rendered by a <Route> component
+    // (like QuestionShowPage) will be given props by that
+    // route component. One of these props called "match", which
+    // contains information related to the pattern matched path
+    // defined in App.js
+    // <Route path="/questions/:id/:test/:something" component={QuestionShowPage} />
+    // match: {
+    //   params: {
+    //     id: <whatever-id-is>,
+    //     test: <whatever-test-is>,
+    //     something: <whatever-something-is>
+    //   }
+    // }
+    Product.one(this.props.match.params.id).then(product => {
+      this.setState({ product, isLoading: false });
+    });
+  }
+
   render(){
-    if (!this.state.product) {
-      return (
-        <div className="Page">
-          <h3 className="ui red header">Product doesn't exist</h3>
-        </div>
-      );
+    if (this.state.isLoading) {
+      return <Spinner message="Product doesn't exist" />;
     }
     return (
       <div className="Page">
@@ -56,12 +75,12 @@ class ProductShowPage extends Component {
         >
           Delete
         </button>
-        <h2>Tags</h2>
-        <TagList 
-        //tags={oneProductData.tags} 
-        tags={this.state.product.tags}
-        />
-        <br />
+          <h2>Tags</h2>
+          <TagList 
+          //tags={oneProductData.tags} 
+          tags={this.state.product.tags}
+          />
+          <br />
         <ReviewList 
         // reviews={oneProductData.reviews}
         reviews={this.state.product.reviews} 

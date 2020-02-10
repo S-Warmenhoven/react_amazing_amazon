@@ -1,6 +1,8 @@
 import React, { Component } from "react";
+import { Link } from "react-router-dom";
+import { Product } from "../api/product";
+import { Spinner } from "./Spinner";
 
-import data from "../productData";
 
 export class ProductIndexPage extends Component {
   constructor(props) {
@@ -11,7 +13,8 @@ export class ProductIndexPage extends Component {
       // a new array that is stored in the state
       // of this component, as the state's products field
       // products: data.map(product => product)
-      products: [...data]
+      products: [],
+      isLoading: true
     };
 
   }
@@ -37,14 +40,29 @@ export class ProductIndexPage extends Component {
     });
   }
 
+  componentDidMount() {
+    Product.all().then(products => {
+      this.setState({ products, isLoading: false });
+    });
+  }
+
   render() {
+    if (this.state.isLoading) {
+      return <Spinner message="Wait to load the list of questions" />;
+    }
     return (
       <main>
         <h2 className="ui horizontal divider header">Products</h2>
         <ul className="ui list">
           {this.state.products.map(product => (
             <li className="item" key={product.id}>
-              <a className="ui link" href="">{product.title}</a>
+              <Link
+              to={`/products/${product.id}`}
+              className="ui link"
+              href=""
+              >
+                {product.title}
+              </Link>
               <button
                 className="ui small right floated red button"
                 onClick={() => this.deleteProduct(product.id)}
